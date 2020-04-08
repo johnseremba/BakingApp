@@ -1,4 +1,4 @@
-package com.example.bakingapp.ui;
+package com.example.bakingapp.ui.detail;
 
 
 import android.os.Bundle;
@@ -14,10 +14,10 @@ import com.example.bakingapp.R;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class RecipeStepFragment extends Fragment {
+public class ViewRecipeStepFragment extends Fragment {
 
 
-    public RecipeStepFragment() {
+    public ViewRecipeStepFragment() {
         // Required empty public constructor
     }
 
@@ -26,7 +26,7 @@ public class RecipeStepFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_recipe_step, container, false);
+        return inflater.inflate(R.layout.fragment_view_recipe_step, container, false);
     }
 
 }

@@ -32,11 +32,9 @@ public class Repository {
         return repository;
     }
 
-    public List<Recipe> getRecipies() {
-        return recipeList;
-    }
+    public List<Recipe> getRecipes() {
+        if (recipeList != null && recipeList.size() > 0) return recipeList;
 
-    private List<Recipe> getRecipes() {
         String recipeJson = getRecipesFromJson();
 
         if (recipeJson == null || recipeJson.isEmpty()) return null;

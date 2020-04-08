@@ -4,24 +4,25 @@ import java.util.List;
 
 public class Recipe {
     private int id;
+    private String name;
     private String image;
-    private String servings;
+    private int servings;
     private List<Ingredient> ingredients;
     private List<Step> steps;
 
     public Recipe() {
     }
 
-    public Recipe(int id, String image, String servings, List<Ingredient> ingredients, List<Step> steps) {
-        this.id = id;
-        this.image = image;
-        this.servings = servings;
-        this.ingredients = ingredients;
-        this.steps = steps;
-    }
-
     public int getId() {
         return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public void setId(int id) {
@@ -36,11 +37,11 @@ public class Recipe {
         this.image = image;
     }
 
-    public String getServings() {
+    public int getServings() {
         return servings;
     }
 
-    public void setServings(String servings) {
+    public void setServings(int servings) {
         this.servings = servings;
     }
 

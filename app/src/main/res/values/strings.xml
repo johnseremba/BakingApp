@@ -4,4 +4,5 @@
     <string name="recipes_no_of_servings">%d Servings</string>
     <string name="action_prev">Prev</string>
     <string name="action_next">Next</string>
+    <string name="title_baking_time">Baking Time</string>
 </resources>

@@ -8,9 +8,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import com.example.bakingapp.ui.RecipeStepFragment;
 import com.example.bakingapp.ui.RecipesFragment;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements RecipesFragment.RecipesFragmentInteractionListener {
     private FragmentManager fragmentManager;
 
     @Override
@@ -30,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void addFragment(Fragment fragment, String tag) {
+    private void addFragment(Fragment fragment, String tag) {
         fragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, fragment, tag)
                 .addToBackStack(tag)
@@ -40,7 +41,15 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onAttachFragment(@NonNull Fragment fragment) {
         super.onAttachFragment(fragment);
-
         // Handle Fragment interaction
+        if (fragment instanceof RecipesFragment) {
+            ((RecipesFragment) fragment).setListener(this);
+        }
+    }
+
+    @Override
+    public void showRecipeStepsFragment() {
+        RecipeStepFragment recipeStepFragment = RecipeStepFragment.getInstance();
+        addFragment(recipeStepFragment, RecipeStepFragment.TAG);
     }
 }

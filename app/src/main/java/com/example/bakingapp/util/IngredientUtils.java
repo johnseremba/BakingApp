@@ -10,6 +10,7 @@ public class IngredientUtils {
             case "t":
             case "tb":
             case "tbsp":
+            case "tblsp":
                 return "Tablespoon";
             case "tsp":
                 return "Teaspoon";

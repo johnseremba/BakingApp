@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">BakingApp</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="recipes_no_of_servings">%d Servings</string>
+    <string name="action_prev">Prev</string>
+    <string name="action_next">Next</string>
 </resources>

@@ -5,4 +5,7 @@
     <string name="action_prev">Prev</string>
     <string name="action_next">Next</string>
     <string name="title_baking_time">Baking Time</string>
+    <string name="msg_ingredient">%1$s of %2$s</string>
+    <string name="title_recipe">%1$s Recipe</string>
+    <string name="label_ingredients">Ingredients</string>
 </resources>

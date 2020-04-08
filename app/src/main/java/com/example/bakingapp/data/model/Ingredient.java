@@ -1,5 +1,7 @@
 package com.example.bakingapp.data.model;
 
+import com.example.bakingapp.util.IngredientUtils;
+
 public class Ingredient {
     private String quantity;
     private String measure;
@@ -23,7 +25,7 @@ public class Ingredient {
     }
 
     public String getMeasure() {
-        return measure;
+        return IngredientUtils.matchMeasurements(this.measure);
     }
 
     public void setMeasure(String measure) {

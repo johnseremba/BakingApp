@@ -18,7 +18,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.bakingapp.R;
 import com.example.bakingapp.data.Repository;
 import com.example.bakingapp.data.model.Recipe;
+import com.example.bakingapp.data.model.Step;
 import com.example.bakingapp.ui.adapters.IngredientsAdapter;
+import com.example.bakingapp.ui.adapters.RecipeStepsAdapter;
 import com.example.bakingapp.ui.viewmodel.RecipeSharedViewModel;
 import com.example.bakingapp.ui.viewmodel.SharedViewModelFactory;
 import com.squareup.picasso.Picasso;
@@ -30,6 +32,7 @@ public class RecipeStepFragment extends Fragment {
     public static final String TAG = RecipeStepFragment.class.getSimpleName();
     private RecipeSharedViewModel viewModel;
     private IngredientsAdapter ingredientsAdapter;
+    private RecipeStepsAdapter recipeStepsAdapter;
 
     @BindView(R.id.text_recipe_label)
     TextView textRecipeLabel;
@@ -70,11 +73,18 @@ public class RecipeStepFragment extends Fragment {
     }
 
     private void initRecyclerViews() {
-        RecyclerView.LayoutManager layoutManager = new GridLayoutManager(getContext(), 2);
-        ingredientsRecyclerView.setLayoutManager(layoutManager);
+        RecyclerView.LayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 1);
+        ingredientsRecyclerView.setLayoutManager(gridLayoutManager);
 
         ingredientsAdapter = new IngredientsAdapter();
         ingredientsRecyclerView.setAdapter(ingredientsAdapter);
+
+        recipeStepsAdapter = new RecipeStepsAdapter(this::onClickStep);
+        recipeStepsRecyclerView.setAdapter(recipeStepsAdapter);
+    }
+
+    private void onClickStep(Step step) {
+
     }
 
     private void loadRecipe() {
@@ -91,5 +101,6 @@ public class RecipeStepFragment extends Fragment {
 
         // Load recipes
         ingredientsAdapter.setIngredients(recipe.getIngredients());
+        recipeStepsAdapter.setSteps(recipe.getSteps());
     }
 }

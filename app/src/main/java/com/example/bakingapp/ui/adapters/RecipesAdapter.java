@@ -1,4 +1,4 @@
-package com.example.bakingapp.ui.recipes;
+package com.example.bakingapp.ui.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;

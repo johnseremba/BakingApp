@@ -8,7 +8,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".ui.detail.ViewRecipeStepFragment">
+        tools:context=".ui.ViewRecipeStepFragment">
 
         <com.google.android.exoplayer2.ui.PlayerView
             android:id="@+id/player_view"

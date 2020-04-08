@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
-import com.example.bakingapp.ui.recipes.RecipesFragment;
+import com.example.bakingapp.ui.RecipesFragment;
 
 public class MainActivity extends AppCompatActivity {
     private FragmentManager fragmentManager;

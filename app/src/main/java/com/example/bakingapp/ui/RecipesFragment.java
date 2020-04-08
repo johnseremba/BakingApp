@@ -1,4 +1,4 @@
-package com.example.bakingapp.ui.recipes;
+package com.example.bakingapp.ui;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -14,6 +14,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bakingapp.MainActivity;
 import com.example.bakingapp.R;
+import com.example.bakingapp.data.Repository;
+import com.example.bakingapp.ui.adapters.RecipesAdapter;
+import com.example.bakingapp.ui.viewmodel.RecipeSharedViewModel;
+import com.example.bakingapp.ui.viewmodel.SharedViewModelFactory;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -23,7 +27,7 @@ import butterknife.Unbinder;
 public class RecipesFragment extends Fragment {
     public static final String TAG = RecipesFragment.class.getSimpleName();
     private Unbinder unbinder;
-    private RecipesFragmentViewModel viewModel;
+    private RecipeSharedViewModel viewModel;
 
     @BindView(R.id.recipes_recycler_view)
     RecyclerView recipesRecyclerView;
@@ -42,7 +46,8 @@ public class RecipesFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_recipes, container, false);
         unbinder = ButterKnife.bind(this, view);
-        viewModel = new ViewModelProvider(this).get(RecipesFragmentViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity(),
+                new SharedViewModelFactory(Repository.getInstance())).get(RecipeSharedViewModel.class);
         return view;
     }
 

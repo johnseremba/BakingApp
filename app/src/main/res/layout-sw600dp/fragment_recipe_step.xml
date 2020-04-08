@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="horizontal"
-    tools:context=".ui.steps.RecipeStepFragment">
+    tools:context=".ui.RecipeStepFragment">
 
     <fragment
         android:id="@+id/fragment_recipe_steps"

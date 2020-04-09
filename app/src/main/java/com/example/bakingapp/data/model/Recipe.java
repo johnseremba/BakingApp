@@ -60,4 +60,24 @@ public class Recipe {
     public void setSteps(List<Step> steps) {
         this.steps = steps;
     }
+
+    public int numberOfSteps() {
+        return steps != null ? steps.size() : 0;
+    }
+
+    public Step nextStep(int position) {
+        try {
+            return steps.get(++position);
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
+    }
+
+    public Step prevStep(int position) {
+        try {
+            return steps.get(--position);
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
+    }
 }

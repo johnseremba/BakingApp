@@ -33,6 +33,7 @@ public class RecipeStepFragment extends Fragment {
     private RecipeSharedViewModel viewModel;
     private IngredientsAdapter ingredientsAdapter;
     private RecipeStepsAdapter recipeStepsAdapter;
+    private RecipeStepFragmentInteractionListener mListener;
 
     @BindView(R.id.text_recipe_label)
     TextView textRecipeLabel;
@@ -73,7 +74,7 @@ public class RecipeStepFragment extends Fragment {
     }
 
     private void initRecyclerViews() {
-        RecyclerView.LayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 1);
+        RecyclerView.LayoutManager gridLayoutManager = new GridLayoutManager(getContext(), 2);
         ingredientsRecyclerView.setLayoutManager(gridLayoutManager);
 
         ingredientsAdapter = new IngredientsAdapter();
@@ -84,7 +85,8 @@ public class RecipeStepFragment extends Fragment {
     }
 
     private void onClickStep(Step step) {
-
+        viewModel.setSelectedStep(step);
+        mListener.showViewRecipeStepFragment();
     }
 
     private void loadRecipe() {
@@ -102,5 +104,13 @@ public class RecipeStepFragment extends Fragment {
         // Load recipes
         ingredientsAdapter.setIngredients(recipe.getIngredients());
         recipeStepsAdapter.setSteps(recipe.getSteps());
+    }
+
+    public void setListener(RecipeStepFragmentInteractionListener listener) {
+        mListener = listener;
+    }
+
+    public interface RecipeStepFragmentInteractionListener {
+        void showViewRecipeStepFragment();
     }
 }

@@ -10,8 +10,9 @@ import androidx.fragment.app.FragmentManager;
 
 import com.example.bakingapp.ui.RecipeStepFragment;
 import com.example.bakingapp.ui.RecipesFragment;
+import com.example.bakingapp.ui.ViewRecipeStepFragment;
 
-public class MainActivity extends AppCompatActivity implements RecipesFragment.RecipesFragmentInteractionListener {
+public class MainActivity extends AppCompatActivity {
     private FragmentManager fragmentManager;
 
     @Override
@@ -24,7 +25,7 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.R
         addFragment(recipesFragment, RecipesFragment.TAG);
     }
 
-    public void udpateAppToolbar(String title) {
+    public void updateAppToolbar(String title) {
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setTitle(title);
@@ -43,13 +44,19 @@ public class MainActivity extends AppCompatActivity implements RecipesFragment.R
         super.onAttachFragment(fragment);
         // Handle Fragment interaction
         if (fragment instanceof RecipesFragment) {
-            ((RecipesFragment) fragment).setListener(this);
+            ((RecipesFragment) fragment).setListener(recipesFragListener);
+        } else if (fragment instanceof RecipeStepFragment) {
+            ((RecipeStepFragment) fragment).setListener(stepFragListener);
         }
     }
 
-    @Override
-    public void showRecipeStepsFragment() {
+    private RecipesFragment.RecipesFragmentInteractionListener recipesFragListener = () -> {
         RecipeStepFragment recipeStepFragment = RecipeStepFragment.getInstance();
         addFragment(recipeStepFragment, RecipeStepFragment.TAG);
-    }
+    };
+
+    private RecipeStepFragment.RecipeStepFragmentInteractionListener stepFragListener = () -> {
+        ViewRecipeStepFragment viewRecipeStepFragment = ViewRecipeStepFragment.getInstance();
+        addFragment(viewRecipeStepFragment, ViewRecipeStepFragment.TAG);
+    };
 }

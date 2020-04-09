@@ -70,7 +70,7 @@ public class RecipesFragment extends Fragment {
 
     private void initUI() {
         // update toolbar
-        ((MainActivity) requireActivity()).udpateAppToolbar(getString(R.string.title_baking_time));
+        ((MainActivity) requireActivity()).updateAppToolbar(getString(R.string.title_baking_time));
 
         // Populate RecyclerView
         RecipesAdapter adapter = new RecipesAdapter(this::onClickRecipe);

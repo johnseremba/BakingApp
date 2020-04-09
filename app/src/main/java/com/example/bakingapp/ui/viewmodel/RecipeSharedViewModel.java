@@ -42,4 +42,16 @@ public class RecipeSharedViewModel extends ViewModel {
     public void setSelectedStep(Step step) {
         selectedStep.setValue(step);
     }
+
+    public Step getNextStep() {
+        if (selectedRecipe.getValue() == null) return null;
+        int currentStepId = selectedRecipe.getValue().getId();
+        return selectedRecipe.getValue().nextStep(currentStepId);
+    }
+
+    public Step getPrevStep() {
+        if (selectedRecipe.getValue() == null) return null;
+        int currentStepId = selectedRecipe.getValue().getId();
+        return selectedRecipe.getValue().prevStep(currentStepId);
+    }
 }

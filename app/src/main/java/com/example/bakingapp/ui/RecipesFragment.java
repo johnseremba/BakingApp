@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
@@ -70,7 +71,12 @@ public class RecipesFragment extends Fragment {
 
     private void initUI() {
         // update toolbar
-        ((MainActivity) requireActivity()).updateAppToolbar(getString(R.string.title_baking_time));
+        ActionBar actionBar = ((MainActivity) requireActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(getString(R.string.title_baking_time));
+            actionBar.setDisplayHomeAsUpEnabled(false);
+            actionBar.setDisplayShowHomeEnabled(false);
+        }
 
         // Populate RecyclerView
         RecipesAdapter adapter = new RecipesAdapter(this::onClickRecipe);

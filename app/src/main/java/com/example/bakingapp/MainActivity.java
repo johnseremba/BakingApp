@@ -1,9 +1,9 @@
 package com.example.bakingapp;
 
 import android.os.Bundle;
+import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -19,16 +19,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         fragmentManager = getSupportFragmentManager();
-        RecipesFragment recipesFragment = RecipesFragment.newInstance();
-        addFragment(recipesFragment, RecipesFragment.TAG);
-    }
 
-    public void updateAppToolbar(String title) {
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setTitle(title);
+        if (savedInstanceState == null) {
+            RecipesFragment recipesFragment = RecipesFragment.newInstance();
+            addFragment(recipesFragment, RecipesFragment.TAG);
         }
     }
 
@@ -48,6 +43,24 @@ public class MainActivity extends AppCompatActivity {
         } else if (fragment instanceof RecipeStepFragment) {
             ((RecipeStepFragment) fragment).setListener(stepFragListener);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        int backStackEntryCount = fragmentManager.getBackStackEntryCount();
+        if (backStackEntryCount == 1) {
+            finish();
+        } else {
+            fragmentManager.popBackStackImmediate();
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private RecipesFragment.RecipesFragmentInteractionListener recipesFragListener = () -> {

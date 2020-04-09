@@ -13,6 +13,7 @@ import java.util.List;
 public class RecipeSharedViewModel extends ViewModel {
     private Repository repository;
     private List<Recipe> recipes;
+    private String selectedRecipeName;
     private MutableLiveData<Recipe> selectedRecipe = new MutableLiveData<>();
     private MutableLiveData<Step> selectedStep = new MutableLiveData<>();
 
@@ -32,6 +33,7 @@ public class RecipeSharedViewModel extends ViewModel {
     }
 
     public void setSelectedRecipe(Recipe recipe) {
+        selectedRecipeName = recipe.getName();
         selectedRecipe.setValue(recipe);
     }
 
@@ -43,15 +45,27 @@ public class RecipeSharedViewModel extends ViewModel {
         selectedStep.setValue(step);
     }
 
+    public String getSelectedRecipeName() {
+        return selectedRecipeName;
+    }
+
+    public boolean hasNext() {
+        return getNextStep() != null;
+    }
+
+    public boolean hasPrev() {
+        return getPrevStep() != null;
+    }
+
     public Step getNextStep() {
-        if (selectedRecipe.getValue() == null) return null;
-        int currentStepId = selectedRecipe.getValue().getId();
+        if (selectedStep.getValue() == null || selectedRecipe.getValue() == null) return null;
+        int currentStepId = selectedStep.getValue().getId();
         return selectedRecipe.getValue().nextStep(currentStepId);
     }
 
     public Step getPrevStep() {
-        if (selectedRecipe.getValue() == null) return null;
-        int currentStepId = selectedRecipe.getValue().getId();
+        if (selectedStep.getValue() == null || selectedRecipe.getValue() == null) return null;
+        int currentStepId = selectedStep.getValue().getId();
         return selectedRecipe.getValue().prevStep(currentStepId);
     }
 }

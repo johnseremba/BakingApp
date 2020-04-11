@@ -69,6 +69,7 @@ public class Recipe {
         try {
             return steps.get(++position);
         } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
             return null;
         }
     }
@@ -77,6 +78,7 @@ public class Recipe {
         try {
             return steps.get(--position);
         } catch (IndexOutOfBoundsException e) {
+            e.printStackTrace();
             return null;
         }
     }

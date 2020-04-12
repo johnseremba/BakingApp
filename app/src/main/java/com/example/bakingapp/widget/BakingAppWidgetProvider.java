@@ -3,24 +3,27 @@ package com.example.bakingapp.widget;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.widget.RemoteViews;
-import android.widget.Toast;
 
+import com.example.bakingapp.MainActivity;
 import com.example.bakingapp.R;
+import com.example.bakingapp.data.Repository;
+import com.example.bakingapp.data.model.Recipe;
 
 public class BakingAppWidgetProvider extends AppWidgetProvider {
-    public static final String EXTRA_ITEM = "com.example.bakingapp.widget.EXTRA_ITEM";
-    public static final String INGREDIENT_ACTION = "com.example.bakingapp.widget.INGREDIENT_ACTION";
+    public static final String EXTRA_WIDGET_RECIPE = "com.example.bakingapp.widget.EXTRA_WIDGET_RECIPE";
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
-        if (intent.getAction().equals(INGREDIENT_ACTION)) {
-            int viewIndex = intent.getIntExtra(EXTRA_ITEM, 0);
-            Toast.makeText(context, "Touched: " + viewIndex, Toast.LENGTH_SHORT).show();
+        if (intent.getAction().equals(AppWidgetManager.ACTION_APPWIDGET_UPDATE)) {
+            AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+            // Widget update broadcast
+            ComponentName componentName = new ComponentName(context, BakingAppWidgetProvider.class);
+            onUpdate(context, appWidgetManager, appWidgetManager.getAppWidgetIds(componentName));
         }
         super.onReceive(context, intent);
     }
@@ -39,20 +42,25 @@ public class BakingAppWidgetProvider extends AppWidgetProvider {
             remoteViews.setRemoteAdapter(R.id.list_widget_ingredients, intent);
             remoteViews.setEmptyView(R.id.list_widget_ingredients, R.id.text_widget_empty_view);
 
-            // Create fillInIntent template
-            Intent fillInIntentTemplate = new Intent(context, BakingAppWidgetProvider.class);
-            fillInIntentTemplate.setAction(INGREDIENT_ACTION);
-            fillInIntentTemplate.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+            // Set widget title to be the title of the selected recipe
+            Recipe widgetRecipe = Repository.getInstance().getRecipeToShare();
+            remoteViews.setTextViewText(R.id.text_widget_recipe_title,
+                    context.getString(R.string.title_recipe, widgetRecipe.getName()));
 
-            intent.setData(Uri.parse(intent.toUri(Intent.URI_INTENT_SCHEME)));
-            PendingIntent fillInPendingIntent = PendingIntent.getBroadcast(context,
-                    0,
-                    fillInIntentTemplate,
-                    PendingIntent.FLAG_UPDATE_CURRENT);
-            remoteViews.setPendingIntentTemplate(R.id.list_widget_ingredients, fillInPendingIntent);
+            // Create an Intent to launch the MainActivity
+            Intent activityIntent = new Intent(context, MainActivity.class);
+            activityIntent.putExtra(EXTRA_WIDGET_RECIPE, widgetRecipe);
+            PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, activityIntent, 0);
+            remoteViews.setOnClickPendingIntent(R.id.text_widget_recipe_title, pendingIntent);
 
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews);
         }
         super.onUpdate(context, appWidgetManager, appWidgetIds);
+    }
+
+    public static void sendRefreshBroadcast(Context context) {
+        Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+        intent.setComponent(new ComponentName(context, BakingAppWidgetProvider.class));
+        context.sendBroadcast(intent);
     }
 }

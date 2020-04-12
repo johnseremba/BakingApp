@@ -7,19 +7,41 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.ViewModelProvider;
 
+import com.example.bakingapp.data.Repository;
+import com.example.bakingapp.data.model.Recipe;
 import com.example.bakingapp.ui.RecipeStepFragment;
 import com.example.bakingapp.ui.RecipesFragment;
 import com.example.bakingapp.ui.ViewRecipeStepFragment;
+import com.example.bakingapp.ui.viewmodel.RecipeSharedViewModel;
+import com.example.bakingapp.ui.viewmodel.SharedViewModelFactory;
+import com.example.bakingapp.widget.BakingAppWidgetProvider;
 
 public class MainActivity extends AppCompatActivity {
     private FragmentManager fragmentManager;
+    private RecipeSharedViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        viewModel = new ViewModelProvider(this,
+                new SharedViewModelFactory(Repository.getInstance())).get(RecipeSharedViewModel.class);
+
         fragmentManager = getSupportFragmentManager();
+
+        if (getIntent() != null) {
+            // If the app is launched from the widget, load the provided recipe and display it
+            Recipe recipe = getIntent().getParcelableExtra(BakingAppWidgetProvider.EXTRA_WIDGET_RECIPE);
+            if (recipe != null) {
+                viewModel.setSelectedRecipe(recipe);
+                RecipeStepFragment recipeStepFragment = RecipeStepFragment.getInstance();
+                addFragment(recipeStepFragment, RecipeStepFragment.TAG);
+                return;
+            }
+        }
 
         if (savedInstanceState == null) {
             RecipesFragment recipesFragment = RecipesFragment.newInstance();

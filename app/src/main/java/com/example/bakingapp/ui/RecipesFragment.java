@@ -19,6 +19,7 @@ import com.example.bakingapp.data.model.Recipe;
 import com.example.bakingapp.ui.adapters.RecipesAdapter;
 import com.example.bakingapp.ui.viewmodel.RecipeSharedViewModel;
 import com.example.bakingapp.ui.viewmodel.SharedViewModelFactory;
+import com.example.bakingapp.widget.BakingAppWidgetProvider;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -88,6 +89,9 @@ public class RecipesFragment extends Fragment {
     private void onClickRecipe(Recipe recipe) {
         viewModel.setSelectedRecipe(recipe);
         mListener.showRecipeStepsFragment();
+
+        // update App widget with the selected recipe
+        BakingAppWidgetProvider.sendRefreshBroadcast(requireContext().getApplicationContext());
     }
 
     public interface RecipesFragmentInteractionListener {

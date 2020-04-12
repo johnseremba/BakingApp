@@ -9,7 +9,7 @@
     android:orientation="horizontal">
 
     <TextView
-        android:id="@+id/text_quantity"
+        android:id="@+id/text_widget_quantity"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:background="@color/colorAccent"
@@ -20,7 +20,7 @@
         tools:text="12" />
 
     <TextView
-        android:id="@+id/text_ingredient"
+        android:id="@+id/text_widget_ingredient"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"

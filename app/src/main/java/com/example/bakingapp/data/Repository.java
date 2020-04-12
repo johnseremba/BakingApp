@@ -1,6 +1,7 @@
 package com.example.bakingapp.data;
 
 import com.example.bakingapp.data.model.Recipe;
+import com.example.bakingapp.widget.BakingAppWidgetProvider;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -11,13 +12,15 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 public class Repository {
-    public static final String PATH_TO_JSON_FILE = "res/raw/bakingapp.json";
+    private static final String PATH_TO_JSON_FILE = "res/raw/bakingapp.json";
     private static Repository repository;
     private static final Object LOCK = new Object();
 
     private List<Recipe> recipeList;
+    private Recipe widgetRecipe;
 
     private Repository() {
         recipeList = getRecipes();
@@ -61,5 +64,19 @@ public class Repository {
             e.printStackTrace();
         }
         return null;
+    }
+
+    // provide recipe to widget
+    public Recipe getRecipeToShare() {
+        if (widgetRecipe == null) {
+            int randomId = new Random().nextInt(recipeList.size() - 1);
+            widgetRecipe = recipeList.get(randomId);
+        }
+        return widgetRecipe;
+    }
+
+    // set recipe to serve to widget
+    public void setWidgetRecipe(Recipe widgetRecipe) {
+        this.widgetRecipe = widgetRecipe;
     }
 }

@@ -1,8 +1,11 @@
 package com.example.bakingapp.data.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.List;
 
-public class Recipe {
+public class Recipe implements Parcelable {
     private int id;
     private String name;
     private String image;
@@ -12,6 +15,27 @@ public class Recipe {
 
     public Recipe() {
     }
+
+    protected Recipe(Parcel in) {
+        id = in.readInt();
+        name = in.readString();
+        image = in.readString();
+        servings = in.readInt();
+        ingredients = in.createTypedArrayList(Ingredient.CREATOR);
+        steps = in.createTypedArrayList(Step.CREATOR);
+    }
+
+    public static final Creator<Recipe> CREATOR = new Creator<Recipe>() {
+        @Override
+        public Recipe createFromParcel(Parcel in) {
+            return new Recipe(in);
+        }
+
+        @Override
+        public Recipe[] newArray(int size) {
+            return new Recipe[size];
+        }
+    };
 
     public int getId() {
         return id;
@@ -81,5 +105,20 @@ public class Recipe {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(name);
+        dest.writeString(image);
+        dest.writeInt(servings);
+        dest.writeTypedList(ingredients);
+        dest.writeTypedList(steps);
     }
 }

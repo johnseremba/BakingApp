@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
             toggleTwoPaneLayout(true);
             fragmentManager.beginTransaction()
                     .replace(R.id.fragment_detail_container, fragment, tag)
+                    .addToBackStack(tag)
                     .commit();
             return;
         }

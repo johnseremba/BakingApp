@@ -115,6 +115,8 @@ public class ViewRecipeStepFragment extends Fragment {
     }
 
     private void resizeVideoPlayer() {
+        if (getResources().getBoolean(R.bool.isLarge)) return;
+
         DisplayMetrics displayMetrics = new DisplayMetrics();
         requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) playerView.getLayoutParams();
@@ -124,6 +126,8 @@ public class ViewRecipeStepFragment extends Fragment {
     }
 
     private void hideAppBar() {
+        if (getResources().getBoolean(R.bool.isLarge)) return;
+
         View decorView = requireActivity().getWindow().getDecorView();
         decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY

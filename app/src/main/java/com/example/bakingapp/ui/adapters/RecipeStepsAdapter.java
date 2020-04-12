@@ -47,22 +47,21 @@ public class RecipeStepsAdapter extends RecyclerView.Adapter<RecipeStepsAdapter.
         this.notifyDataSetChanged();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.text_step_number)
         TextView stepNumber;
 
         @BindView(R.id.text_recipe_short_desc)
         TextView recipeShortDescription;
 
-        public ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
 
-        public void bind(Step step) {
+        void bind(Step step) {
             stepNumber.setText(Integer.toString(step.getId()));
             recipeShortDescription.setText(step.getShortDescription());
-
             itemView.setOnClickListener(v -> mListener.onClick(step));
         }
     }

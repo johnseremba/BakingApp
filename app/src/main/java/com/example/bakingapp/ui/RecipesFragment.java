@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.bakingapp.MainActivity;
@@ -80,8 +81,11 @@ public class RecipesFragment extends Fragment {
         }
 
         // Populate RecyclerView
+        if (getResources().getBoolean(R.bool.isLarge)) {
+            RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
+            recipesRecyclerView.setLayoutManager(layoutManager);
+        }
         RecipesAdapter adapter = new RecipesAdapter(this::onClickRecipe);
-
         adapter.setRecipes(viewModel.getRecipes());
         recipesRecyclerView.setAdapter(adapter);
     }

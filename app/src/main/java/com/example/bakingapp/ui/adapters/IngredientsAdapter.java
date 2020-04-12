@@ -45,19 +45,19 @@ public class IngredientsAdapter extends RecyclerView.Adapter<IngredientsAdapter.
         this.notifyDataSetChanged();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.text_quantity)
         TextView textQuantity;
 
         @BindView(R.id.text_ingredient)
         TextView textIngredient;
 
-        public ViewHolder(@NonNull View itemView) {
+        ViewHolder(@NonNull View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
 
-        public void bind(Ingredient ingredient) {
+        void bind(Ingredient ingredient) {
             textQuantity.setText(ingredient.getQuantity());
             textIngredient.setText(itemView.getContext()
                     .getString(R.string.msg_ingredient, ingredient.getMeasure(), ingredient.getIngredient()));

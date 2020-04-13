@@ -20,6 +20,7 @@ import com.example.bakingapp.data.model.Recipe;
 import com.example.bakingapp.ui.adapters.RecipesAdapter;
 import com.example.bakingapp.ui.viewmodel.RecipeSharedViewModel;
 import com.example.bakingapp.ui.viewmodel.SharedViewModelFactory;
+import com.example.bakingapp.util.InjectorUtils;
 import com.example.bakingapp.widget.BakingAppWidgetProvider;
 
 import butterknife.BindView;
@@ -51,7 +52,7 @@ public class RecipesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_recipes, container, false);
         unbinder = ButterKnife.bind(this, view);
         viewModel = new ViewModelProvider(requireActivity(),
-                new SharedViewModelFactory(Repository.getInstance())).get(RecipeSharedViewModel.class);
+                InjectorUtils.provideSharedViewModelFactory()).get(RecipeSharedViewModel.class);
         return view;
     }
 

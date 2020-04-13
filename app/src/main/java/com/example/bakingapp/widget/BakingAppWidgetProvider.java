@@ -13,9 +13,11 @@ import com.example.bakingapp.MainActivity;
 import com.example.bakingapp.R;
 import com.example.bakingapp.data.Repository;
 import com.example.bakingapp.data.model.Recipe;
+import com.example.bakingapp.util.InjectorUtils;
 
 public class BakingAppWidgetProvider extends AppWidgetProvider {
     public static final String EXTRA_WIDGET_RECIPE = "com.example.bakingapp.widget.EXTRA_WIDGET_RECIPE";
+    private Repository mRepository = InjectorUtils.provideRepository();
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -43,7 +45,7 @@ public class BakingAppWidgetProvider extends AppWidgetProvider {
             remoteViews.setEmptyView(R.id.list_widget_ingredients, R.id.text_widget_empty_view);
 
             // Set widget title to be the title of the selected recipe
-            Recipe widgetRecipe = Repository.getInstance().getRecipeToShare();
+            Recipe widgetRecipe = mRepository.getRecipeToShare();
             remoteViews.setTextViewText(R.id.text_widget_recipe_title,
                     context.getString(R.string.title_recipe, widgetRecipe.getName()));
 

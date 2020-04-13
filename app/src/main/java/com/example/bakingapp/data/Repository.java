@@ -1,7 +1,6 @@
 package com.example.bakingapp.data;
 
 import com.example.bakingapp.data.model.Recipe;
-import com.example.bakingapp.widget.BakingAppWidgetProvider;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

@@ -11,13 +11,12 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.bakingapp.data.Repository;
 import com.example.bakingapp.data.model.Recipe;
 import com.example.bakingapp.ui.RecipeStepFragment;
 import com.example.bakingapp.ui.RecipesFragment;
 import com.example.bakingapp.ui.ViewRecipeStepFragment;
 import com.example.bakingapp.ui.viewmodel.RecipeSharedViewModel;
-import com.example.bakingapp.ui.viewmodel.SharedViewModelFactory;
+import com.example.bakingapp.util.InjectorUtils;
 import com.example.bakingapp.widget.BakingAppWidgetProvider;
 
 public class MainActivity extends AppCompatActivity {
@@ -42,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
             Recipe recipe = getIntent().getParcelableExtra(BakingAppWidgetProvider.EXTRA_WIDGET_RECIPE);
             if (recipe != null) {
                 RecipeSharedViewModel viewModel = new ViewModelProvider(this,
-                        new SharedViewModelFactory(Repository.getInstance())).get(RecipeSharedViewModel.class);
+                        InjectorUtils.provideSharedViewModelFactory()).get(RecipeSharedViewModel.class);
                 viewModel.setSelectedRecipe(recipe);
                 RecipeStepFragment recipeStepFragment = RecipeStepFragment.getInstance();
                 addFragment(recipeStepFragment, RecipeStepFragment.TAG);

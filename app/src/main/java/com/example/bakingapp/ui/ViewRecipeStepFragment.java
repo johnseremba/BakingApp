@@ -2,7 +2,6 @@ package com.example.bakingapp.ui;
 
 
 import android.content.res.Configuration;
-import android.media.session.PlaybackState;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -21,10 +20,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bakingapp.MainActivity;
 import com.example.bakingapp.R;
-import com.example.bakingapp.data.Repository;
 import com.example.bakingapp.ui.viewmodel.RecipeSharedViewModel;
-import com.example.bakingapp.ui.viewmodel.SharedViewModelFactory;
-import com.google.android.exoplayer2.C;
+import com.example.bakingapp.util.InjectorUtils;
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
@@ -44,9 +41,17 @@ import butterknife.ButterKnife;
 
 public class ViewRecipeStepFragment extends Fragment {
     public static final String TAG = ViewRecipeStepFragment.class.getSimpleName();
+    private static final String KEY_PLAY_WHEN_READY = "KEY_PLAY_WHEN_READY";
+    private static final String KEY_PLAY_BACK_POSITION = "KEY_PLAY_BACK_POSITION";
+    private static final String KEY_CURRENT_WINDOW = "KEY_CURRENT_WINDOW";
+    private static final String KEY_VIDEO_URL = "KEY_VIDEO_URL";
 
     private RecipeSharedViewModel viewModel;
     private SimpleExoPlayer exoPlayer;
+    private boolean playWhenReady = false;
+    private long playBackPosition;
+    private int currentWindow;
+    private String videoUrl = "";
 
     @BindView(R.id.player_view)
     PlayerView playerView;
@@ -79,7 +84,13 @@ public class ViewRecipeStepFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_view_recipe_step, container, false);
         ButterKnife.bind(this, view);
         viewModel = new ViewModelProvider(requireActivity(),
-                new SharedViewModelFactory(Repository.getInstance())).get(RecipeSharedViewModel.class);
+                InjectorUtils.provideSharedViewModelFactory()).get(RecipeSharedViewModel.class);
+        if (savedInstanceState != null) {
+            playWhenReady = savedInstanceState.getBoolean(KEY_PLAY_WHEN_READY, false);
+            playBackPosition = savedInstanceState.getLong(KEY_PLAY_BACK_POSITION, 0);
+            currentWindow = savedInstanceState.getInt(KEY_CURRENT_WINDOW, 0);
+            videoUrl = savedInstanceState.getString(KEY_VIDEO_URL, "");
+        }
         return view;
     }
 
@@ -94,87 +105,101 @@ public class ViewRecipeStepFragment extends Fragment {
             actionBar.setDisplayShowHomeEnabled(true);
         }
 
-        // Instantiate exo player
-        initPlayer();
         initListeners();
         loadRecipeData();
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putBoolean(KEY_PLAY_WHEN_READY, playWhenReady);
+        outState.putLong(KEY_PLAY_BACK_POSITION, playBackPosition);
+        outState.putInt(KEY_CURRENT_WINDOW, currentWindow);
+        outState.putString(KEY_VIDEO_URL, videoUrl);
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        initPlayer();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (exoPlayer == null) initPlayer();
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            hideSystemUi();
+        }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if (exoPlayer != null) releasePlayer();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (exoPlayer != null) releasePlayer();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (exoPlayer != null) releasePlayer();
     }
 
     private void initPlayer() {
         exoPlayer = new SimpleExoPlayer.Builder(requireContext())
                 .setUseLazyPreparation(true)
                 .build();
+        initExoPlayerListeners();
+
         playerView.setPlayer(exoPlayer);
-        exoPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT);
+        exoPlayer.setPlayWhenReady(playWhenReady);
+        exoPlayer.seekTo(currentWindow, playBackPosition);
+        showRecipeVideo(videoUrl);
+    }
 
-        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            // Set the player to fullscreen when in landscape mode
-            resizeVideoPlayer();
-
-            // Hide appbar
-            hideAppBar();
+    private void releasePlayer() {
+        if (exoPlayer != null) {
+            playWhenReady = exoPlayer.getPlayWhenReady();
+            playBackPosition = exoPlayer.getCurrentPosition();
+            currentWindow = exoPlayer.getCurrentWindowIndex();
+            exoPlayer.release();
+            exoPlayer = null;
         }
     }
 
     private void resizeVideoPlayer() {
-        if (getResources().getBoolean(R.bool.isLarge)) return;
-
         DisplayMetrics displayMetrics = new DisplayMetrics();
         requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
         ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) playerView.getLayoutParams();
         params.height = displayMetrics.heightPixels;
         playerView.setLayoutParams(params);
-        exoPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT);
     }
 
-    private void hideAppBar() {
-        boolean isLarge = getResources().getBoolean(R.bool.isLarge);
-        if (isLarge) return;
-
-        View decorView = requireActivity().getWindow().getDecorView();
-        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+    private void hideSystemUi() {
+        if (getResources().getBoolean(R.bool.isLarge)) return;
+        playerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LOW_PROFILE
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_FULLSCREEN
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        releasePlayer();
-    }
-
-    private void releasePlayer() {
-        exoPlayer.stop();
-        exoPlayer.release();
-        exoPlayer = null;
-    }
-
-    private DataSource.Factory buildDataSourceFactory() {
-        return new DefaultDataSourceFactory(requireContext(), buildHttpDataSourceFactory());
-    }
-
-    private DefaultHttpDataSourceFactory buildHttpDataSourceFactory() {
-        String userAgent = Util.getUserAgent(requireContext(), getString(R.string.app_name));
-        return new DefaultHttpDataSourceFactory(userAgent);
+        resizeVideoPlayer();
     }
 
     private void initListeners() {
         buttonNext.setOnClickListener(v -> viewModel.setSelectedStep(viewModel.getNextStep()));
         buttonPrev.setOnClickListener(v -> viewModel.setSelectedStep(viewModel.getPrevStep()));
+    }
 
+    private void initExoPlayerListeners() {
         exoPlayer.addListener(new Player.EventListener() {
-            @Override
-            public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
-                if (playbackState == PlaybackState.STATE_PLAYING) {
-                    if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                        hideAppBar();
-                    }
-                }
-            }
-
             @Override
             public void onPlayerError(ExoPlaybackException error) {
                 String errMsg = error.getLocalizedMessage();
@@ -209,6 +234,7 @@ public class ViewRecipeStepFragment extends Fragment {
                     : !step.getThumbnailURL().isEmpty()
                     ? step.getThumbnailURL()
                     : "";
+            this.videoUrl = videoUrl;
             showRecipeVideo(videoUrl);
         });
     }
@@ -217,8 +243,21 @@ public class ViewRecipeStepFragment extends Fragment {
         playerView.setVisibility(videoUrl.isEmpty() ? View.GONE : View.VISIBLE);
         if (videoUrl.isEmpty()) return;
         Uri uri = Uri.parse(videoUrl);
-        MediaSource videoSource = new ProgressiveMediaSource.Factory(buildDataSourceFactory()).createMediaSource(uri);
+        MediaSource videoSource = buildMediaSource(uri);
         exoPlayer.prepare(videoSource);
         exoPlayer.setPlayWhenReady(true);
+    }
+
+    private MediaSource buildMediaSource(Uri uri) {
+        return new ProgressiveMediaSource.Factory(buildDataSourceFactory()).createMediaSource(uri);
+    }
+
+    private DataSource.Factory buildDataSourceFactory() {
+        return new DefaultDataSourceFactory(requireContext(), buildHttpDataSourceFactory());
+    }
+
+    private DefaultHttpDataSourceFactory buildHttpDataSourceFactory() {
+        String userAgent = Util.getUserAgent(requireContext(), getString(R.string.app_name));
+        return new DefaultHttpDataSourceFactory(userAgent);
     }
 }

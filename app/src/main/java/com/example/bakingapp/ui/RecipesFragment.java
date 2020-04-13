@@ -1,111 +1,104 @@
 package com.example.bakingapp.ui;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.bakingapp.MainActivity;
 import com.example.bakingapp.R;
+import com.example.bakingapp.data.Repository;
+import com.example.bakingapp.data.model.Recipe;
+import com.example.bakingapp.ui.adapters.RecipesAdapter;
+import com.example.bakingapp.ui.viewmodel.RecipeSharedViewModel;
+import com.example.bakingapp.ui.viewmodel.SharedViewModelFactory;
+import com.example.bakingapp.widget.BakingAppWidgetProvider;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link RecipesFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link RecipesFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.Unbinder;
+
+
 public class RecipesFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    public static final String TAG = RecipesFragment.class.getSimpleName();
+    private Unbinder unbinder;
+    private RecipeSharedViewModel viewModel;
+    private RecipesFragmentInteractionListener mListener;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
-
-    private OnFragmentInteractionListener mListener;
+    @BindView(R.id.recipes_recycler_view)
+    RecyclerView recipesRecyclerView;
 
     public RecipesFragment() {
         // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment RecipesFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static RecipesFragment newInstance(String param1, String param2) {
-        RecipesFragment fragment = new RecipesFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
+    public static RecipesFragment newInstance() {
+        return new RecipesFragment();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_recipes, container, false);
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
+        View view = inflater.inflate(R.layout.fragment_recipes, container, false);
+        unbinder = ButterKnife.bind(this, view);
+        viewModel = new ViewModelProvider(requireActivity(),
+                new SharedViewModelFactory(Repository.getInstance())).get(RecipeSharedViewModel.class);
+        return view;
     }
 
     @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        initUI();
     }
 
     @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
+    public void setListener(RecipesFragmentInteractionListener listener) {
+        mListener = listener;
+    }
+
+    private void initUI() {
+        // update toolbar
+        ActionBar actionBar = ((MainActivity) requireActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(getString(R.string.title_baking_time));
+            actionBar.setDisplayHomeAsUpEnabled(false);
+            actionBar.setDisplayShowHomeEnabled(false);
+        }
+
+        // Populate RecyclerView
+        if (getResources().getBoolean(R.bool.isLarge)) {
+            RecyclerView.LayoutManager layoutManager = new GridLayoutManager(requireContext(), 3);
+            recipesRecyclerView.setLayoutManager(layoutManager);
+        }
+        RecipesAdapter adapter = new RecipesAdapter(this::onClickRecipe);
+        adapter.setRecipes(viewModel.getRecipes());
+        recipesRecyclerView.setAdapter(adapter);
+    }
+
+    private void onClickRecipe(Recipe recipe) {
+        viewModel.setSelectedRecipe(recipe);
+        mListener.showRecipeStepsFragment();
+
+        // update App widget with the selected recipe
+        BakingAppWidgetProvider.sendRefreshBroadcast(requireContext().getApplicationContext());
+    }
+
+    public interface RecipesFragmentInteractionListener {
+        void showRecipeStepsFragment();
     }
 }

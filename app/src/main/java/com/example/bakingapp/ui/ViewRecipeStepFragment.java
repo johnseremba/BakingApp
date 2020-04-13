@@ -101,7 +101,9 @@ public class ViewRecipeStepFragment extends Fragment {
     }
 
     private void initPlayer() {
-        exoPlayer = new SimpleExoPlayer.Builder(requireContext()).build();
+        exoPlayer = new SimpleExoPlayer.Builder(requireContext())
+                .setUseLazyPreparation(true)
+                .build();
         playerView.setPlayer(exoPlayer);
         exoPlayer.setVideoScalingMode(C.VIDEO_SCALING_MODE_SCALE_TO_FIT);
 
@@ -195,7 +197,7 @@ public class ViewRecipeStepFragment extends Fragment {
     }
 
     private void loadRecipeData() {
-        viewModel.getSelectedStep().observe(this, step -> {
+        viewModel.getSelectedStep().observe(getViewLifecycleOwner(), step -> {
             stepDescription.setText(step.getDescription());
             buttonNext.setEnabled(viewModel.hasNext());
             buttonPrev.setEnabled(viewModel.hasPrev());

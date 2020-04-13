@@ -29,7 +29,7 @@ public class RecipeStepsAdapter extends RecyclerView.Adapter<RecipeStepsAdapter.
     @Override
     public RecipeStepsAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_recipe_step, parent, false);
-        return new ViewHolder(view);
+        return new RecipeStepsAdapter.ViewHolder(view);
     }
 
     @Override

@@ -96,7 +96,7 @@ public class RecipeStepFragment extends Fragment {
     }
 
     private void loadRecipe() {
-        viewModel.getSelectedRecipe().observe(this, this::displayRecipeData);
+        viewModel.getSelectedRecipe().observe(getViewLifecycleOwner(), this::displayRecipeData);
     }
 
     private void displayRecipeData(Recipe recipe) {

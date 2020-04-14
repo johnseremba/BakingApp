@@ -1,6 +1,7 @@
 package com.example.bakingapp.ui;
 
 import android.os.Bundle;
+import android.os.RemoteCallbackList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -123,7 +124,7 @@ public class RecipesFragment extends Fragment {
         mListener.showRecipeStepsFragment();
 
         // update App widget with the selected recipe
-        BakingAppWidgetProvider.sendRefreshBroadcast(requireContext().getApplicationContext());
+        BakingAppWidgetProvider.sendRefreshBroadcast(requireContext().getApplicationContext(), recipe);
     }
 
     public interface RecipesFragmentInteractionListener {

@@ -2,11 +2,13 @@ package com.example.bakingapp.data;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
+import androidx.test.espresso.idling.CountingIdlingResource;
 
 import com.example.bakingapp.data.model.Recipe;
 import com.example.bakingapp.util.InjectorUtils;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -35,7 +37,9 @@ public class Repository {
         return repository;
     }
 
-    public LiveData<List<Recipe>> getRecipes() {
+    public LiveData<List<Recipe>> getRecipes(@Nullable final CountingIdlingResource idlingResource) {
+        if (idlingResource != null) idlingResource.increment();
+
         MutableLiveData<List<Recipe>> recipeList = new MutableLiveData<>();
         Call<List<Recipe>> request = recipeService.getBakingData();
         request.enqueue(new Callback<List<Recipe>>() {
@@ -47,6 +51,7 @@ public class Repository {
                 } else {
                     errorLiveData.postValue("No Data!");
                 }
+                if (idlingResource != null) idlingResource.decrement();
             }
 
             @Override

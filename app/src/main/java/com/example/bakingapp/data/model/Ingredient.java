@@ -10,7 +10,10 @@ public class Ingredient implements Parcelable {
     private String measure;
     private String ingredient;
 
-    public Ingredient() {
+    public Ingredient(String quantity, String measure, String ingredient) {
+        this.quantity = quantity;
+        this.measure = measure;
+        this.ingredient = ingredient;
     }
 
     protected Ingredient(Parcel in) {

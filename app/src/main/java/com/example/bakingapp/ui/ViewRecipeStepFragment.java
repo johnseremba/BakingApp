@@ -20,6 +20,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.bakingapp.MainActivity;
 import com.example.bakingapp.R;
+import com.example.bakingapp.data.model.Step;
 import com.example.bakingapp.ui.viewmodel.RecipeSharedViewModel;
 import com.example.bakingapp.util.InjectorUtils;
 import com.google.android.exoplayer2.ExoPlaybackException;
@@ -44,14 +45,13 @@ public class ViewRecipeStepFragment extends Fragment {
     private static final String KEY_PLAY_WHEN_READY = "KEY_PLAY_WHEN_READY";
     private static final String KEY_PLAY_BACK_POSITION = "KEY_PLAY_BACK_POSITION";
     private static final String KEY_CURRENT_WINDOW = "KEY_CURRENT_WINDOW";
-    private static final String KEY_VIDEO_URL = "KEY_VIDEO_URL";
 
     private RecipeSharedViewModel viewModel;
     private SimpleExoPlayer exoPlayer;
     private boolean playWhenReady = true;
     private long playBackPosition;
     private int currentWindow;
-    private String videoUrl = "";
+    private Bundle savedState;
 
     @BindView(R.id.player_view)
     PlayerView playerView;
@@ -76,41 +76,28 @@ public class ViewRecipeStepFragment extends Fragment {
         return new ViewRecipeStepFragment();
     }
 
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_view_recipe_step, container, false);
         ButterKnife.bind(this, view);
-
         viewModel = new ViewModelProvider(requireActivity(),
                 InjectorUtils.provideSharedViewModelFactory()).get(RecipeSharedViewModel.class);
-
-        // update toolbar
-        ActionBar actionBar = ((MainActivity) requireActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setTitle(viewModel.getSelectedRecipeName());
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowHomeEnabled(true);
-        }
-
-        if (savedInstanceState != null) {
-            playWhenReady = savedInstanceState.getBoolean(KEY_PLAY_WHEN_READY, false);
-            playBackPosition = savedInstanceState.getLong(KEY_PLAY_BACK_POSITION, 0);
-            currentWindow = savedInstanceState.getInt(KEY_CURRENT_WINDOW, 0);
-            videoUrl = savedInstanceState.getString(KEY_VIDEO_URL, "");
-        }
         return view;
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        if (savedInstanceState == null) {
-            loadRecipeData();
-        }
+        // update toolbar
+        updateToolbar();
+
+        // Initialize Event Listeners
         initListeners();
+
+        // Restore instance state
+        savedState = savedInstanceState;
     }
 
     @Override
@@ -118,7 +105,6 @@ public class ViewRecipeStepFragment extends Fragment {
         outState.putBoolean(KEY_PLAY_WHEN_READY, playWhenReady);
         outState.putLong(KEY_PLAY_BACK_POSITION, playBackPosition);
         outState.putInt(KEY_CURRENT_WINDOW, currentWindow);
-        outState.putString(KEY_VIDEO_URL, videoUrl);
         super.onSaveInstanceState(outState);
     }
 
@@ -131,7 +117,7 @@ public class ViewRecipeStepFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (exoPlayer == null) initPlayer();
+        initPlayer();
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             hideSystemUi();
         }
@@ -140,31 +126,38 @@ public class ViewRecipeStepFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if (exoPlayer != null) releasePlayer();
+        releasePlayer();
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (exoPlayer != null) releasePlayer();
+        releasePlayer();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if (exoPlayer != null) releasePlayer();
+        releasePlayer();
+    }
+
+    private void updateToolbar() {
+        ActionBar actionBar = ((MainActivity) requireActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(viewModel.getSelectedRecipeName());
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
     }
 
     private void initPlayer() {
+        if (exoPlayer != null) return;
         exoPlayer = new SimpleExoPlayer.Builder(requireContext())
                 .setUseLazyPreparation(true)
                 .build();
-        initExoPlayerListeners();
-
-        playerView.setPlayer(exoPlayer);
         exoPlayer.setPlayWhenReady(playWhenReady);
-        exoPlayer.seekTo(currentWindow, playBackPosition);
-        showRecipeVideo(videoUrl);
+        playerView.setPlayer(exoPlayer);
+        initExoPlayerListeners();
     }
 
     private void releasePlayer() {
@@ -177,6 +170,15 @@ public class ViewRecipeStepFragment extends Fragment {
         }
     }
 
+    private void restorePlayerState(@Nullable Bundle savedInstanceState) {
+        if (savedInstanceState == null) return;
+        playWhenReady = savedInstanceState.getBoolean(KEY_PLAY_WHEN_READY, true);
+        playBackPosition = savedInstanceState.getLong(KEY_PLAY_BACK_POSITION, 0);
+        currentWindow = savedInstanceState.getInt(KEY_CURRENT_WINDOW, 0);
+        exoPlayer.setPlayWhenReady(playWhenReady);
+        exoPlayer.seekTo(playBackPosition);
+    }
+
     private void resizeVideoPlayer() {
         DisplayMetrics displayMetrics = new DisplayMetrics();
         requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -187,7 +189,9 @@ public class ViewRecipeStepFragment extends Fragment {
 
     private void hideSystemUi() {
         if (getResources().getBoolean(R.bool.isLarge)) return;
-        playerView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+
+        View decorView = requireActivity().getWindow().getDecorView();
+        decorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_STABLE
                 | View.SYSTEM_UI_FLAG_LOW_PROFILE
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -198,6 +202,7 @@ public class ViewRecipeStepFragment extends Fragment {
     }
 
     private void initListeners() {
+        viewModel.getSelectedStep().observe(getViewLifecycleOwner(), this::showStepData);
         buttonNext.setOnClickListener(v -> viewModel.setSelectedStep(viewModel.getNextStep()));
         buttonPrev.setOnClickListener(v -> viewModel.setSelectedStep(viewModel.getPrevStep()));
     }
@@ -207,7 +212,6 @@ public class ViewRecipeStepFragment extends Fragment {
             @Override
             public void onPlayerError(ExoPlaybackException error) {
                 String errMsg = error.getLocalizedMessage();
-
                 if (error.type == ExoPlaybackException.TYPE_SOURCE) {
                     IOException cause = error.getSourceException();
                     if (cause instanceof HttpDataSource.HttpDataSourceException) {
@@ -219,36 +223,41 @@ public class ViewRecipeStepFragment extends Fragment {
                         }
                     }
                 }
-
-                errorPlayerError.setVisibility(View.VISIBLE);
-                errorPlayerError.setText(errMsg);
+                showErrorMessage(errMsg);
             }
         });
     }
 
-    private void loadRecipeData() {
-        viewModel.getSelectedStep().observe(getViewLifecycleOwner(), step -> {
-            stepDescription.setText(step.getDescription());
-            buttonNext.setEnabled(viewModel.hasNext());
-            buttonPrev.setEnabled(viewModel.hasPrev());
-
-            // Prepare Video playback
-            String videoUrl = !step.getVideoURL().isEmpty()
-                    ? step.getVideoURL()
-                    : !step.getThumbnailURL().isEmpty()
-                    ? step.getThumbnailURL()
-                    : "";
-            this.videoUrl = videoUrl;
-            showRecipeVideo(videoUrl);
-        });
+    private void showErrorMessage(String errMsg) {
+        errorPlayerError.setVisibility(View.VISIBLE);
+        errorPlayerError.setText(errMsg);
     }
 
-    private void showRecipeVideo(String videoUrl) {
+    private void showStepData(Step step) {
+        // Prepare Video Url
+        String videoUrl = !step.getVideoURL().isEmpty()
+                ? step.getVideoURL()
+                : !step.getThumbnailURL().isEmpty()
+                ? step.getThumbnailURL()
+                : "";
+
         playerView.setVisibility(videoUrl.isEmpty() ? View.GONE : View.VISIBLE);
+        stepDescription.setText(step.getDescription());
+        buttonNext.setEnabled(viewModel.hasNext());
+        buttonPrev.setEnabled(viewModel.hasPrev());
+
+        // Don't load video in case there is no video URL
         if (videoUrl.isEmpty()) return;
+
         Uri uri = Uri.parse(videoUrl);
         MediaSource videoSource = buildMediaSource(uri);
         exoPlayer.prepare(videoSource);
+
+        if (savedState != null) {
+            // restore instance state in the case of a configuration change
+            restorePlayerState(savedState);
+            savedState = null;
+        }
     }
 
     private MediaSource buildMediaSource(Uri uri) {

@@ -1,5 +1,6 @@
 package com.example.bakingapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -36,9 +37,10 @@ public class MainActivity extends AppCompatActivity {
         viewDivider = (View) findViewById(R.id.view_divider);
         mTwoPane = (viewRecipeStepContainer != null);
 
-        if (getIntent() != null) {
+        Intent intent = getIntent();
+        if (intent != null && intent.getExtras() != null) {
             // If the app is launched from the widget, load the provided recipe and display it
-            Recipe recipe = getIntent().getParcelableExtra(BakingAppWidgetProvider.EXTRA_WIDGET_RECIPE);
+            Recipe recipe = intent.getParcelableExtra(BakingAppWidgetProvider.EXTRA_WIDGET_RECIPE);
             if (recipe != null) {
                 RecipeSharedViewModel viewModel = new ViewModelProvider(this,
                         InjectorUtils.provideSharedViewModelFactory()).get(RecipeSharedViewModel.class);

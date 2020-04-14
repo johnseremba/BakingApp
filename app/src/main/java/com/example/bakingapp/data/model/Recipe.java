@@ -13,7 +13,13 @@ public class Recipe implements Parcelable {
     private List<Ingredient> ingredients;
     private List<Step> steps;
 
-    public Recipe() {
+    public Recipe(int id, String name, String image, int servings, List<Ingredient> ingredients, List<Step> steps) {
+        this.id = id;
+        this.name = name;
+        this.image = image;
+        this.servings = servings;
+        this.ingredients = ingredients;
+        this.steps = steps;
     }
 
     protected Recipe(Parcel in) {
@@ -120,5 +126,17 @@ public class Recipe implements Parcelable {
         dest.writeInt(servings);
         dest.writeTypedList(ingredients);
         dest.writeTypedList(steps);
+    }
+
+    @Override
+    public String toString() {
+        return "Recipe{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", image='" + image + '\'' +
+                ", servings=" + servings +
+                ", ingredients=" + ingredients +
+                ", steps=" + steps +
+                '}';
     }
 }

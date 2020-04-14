@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel;
 import com.example.bakingapp.data.Repository;
 import com.example.bakingapp.data.model.Recipe;
 import com.example.bakingapp.data.model.Step;
+import com.example.bakingapp.util.InjectorUtils;
 
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class RecipeSharedViewModel extends ViewModel {
 
     public RecipeSharedViewModel(Repository repository) {
         this.repository = repository;
-        recipes = repository.getRecipes();
+        recipes = repository.getRecipes(InjectorUtils.provideIdlingResource());
         errorMsg = repository.getErrors();
     }
 

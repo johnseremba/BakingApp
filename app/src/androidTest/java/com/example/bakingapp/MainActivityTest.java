@@ -4,14 +4,19 @@ import android.content.res.Resources;
 import android.view.View;
 
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.test.core.app.ActivityScenario;
+import androidx.test.espresso.IdlingRegistry;
+import androidx.test.espresso.IdlingResource;
 import androidx.test.espresso.NoMatchingViewException;
 import androidx.test.espresso.ViewAssertion;
 import androidx.test.espresso.contrib.RecyclerViewActions;
-import androidx.test.ext.junit.rules.ActivityScenarioRule;
 import androidx.test.filters.LargeTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import org.junit.Rule;
+import com.example.bakingapp.util.InjectorUtils;
+
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -32,10 +37,21 @@ import static org.hamcrest.Matchers.not;
 @LargeTest
 public class MainActivityTest {
     private static final int ITEM_BELOW_FOLD = 1;
+    private IdlingResource idlingResource;
 
-    @Rule
-    public ActivityScenarioRule<MainActivity> mainActivity =
-            new ActivityScenarioRule<>(MainActivity.class);
+    @Before
+    public void registerIdlingResource() {
+        idlingResource = InjectorUtils.provideTestingIdlingResource();
+        ActivityScenario activityScenario = ActivityScenario.launch(MainActivity.class);
+        activityScenario.onActivity(activity -> IdlingRegistry.getInstance().register(idlingResource));
+    }
+
+    @After
+    public void tearDown() {
+        if (idlingResource != null) {
+            IdlingRegistry.getInstance().unregister(idlingResource);
+        }
+    }
 
     @Test
     public void uiInitializedProperly() {

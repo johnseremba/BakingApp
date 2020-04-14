@@ -1,77 +1,74 @@
 package com.example.bakingapp.data;
 
-import com.example.bakingapp.data.model.Recipe;
-import com.example.bakingapp.widget.BakingAppWidgetProvider;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
+import androidx.test.espresso.idling.CountingIdlingResource;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.lang.reflect.Type;
+import com.example.bakingapp.data.model.Recipe;
+import com.example.bakingapp.util.InjectorUtils;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class Repository {
-    private static final String PATH_TO_JSON_FILE = "res/raw/bakingapp.json";
-    private static Repository repository;
     private static final Object LOCK = new Object();
+    private final RecipeService recipeService;
+    private static Repository repository;
 
-    private List<Recipe> recipeList;
+    private MutableLiveData<String> errorLiveData = new MutableLiveData<>();
     private Recipe widgetRecipe;
 
-    private Repository() {
-        recipeList = getRecipes();
+    private Repository(RecipeService recipeService) {
+        this.recipeService = recipeService;
     }
 
     public static Repository getInstance() {
         if (repository == null) {
             synchronized (LOCK) {
-                repository = new Repository();
+                repository = new Repository(InjectorUtils.provideRecipeService());
             }
         }
         return repository;
     }
 
-    public List<Recipe> getRecipes() {
-        if (recipeList != null && recipeList.size() > 0) return recipeList;
+    public LiveData<List<Recipe>> getRecipes(@Nullable final CountingIdlingResource idlingResource) {
+        if (idlingResource != null) idlingResource.increment();
 
-        String recipeJson = getRecipesFromJson();
+        MutableLiveData<List<Recipe>> recipeList = new MutableLiveData<>();
+        Call<List<Recipe>> request = recipeService.getBakingData();
+        request.enqueue(new Callback<List<Recipe>>() {
+            @Override
+            public void onResponse(@NotNull Call<List<Recipe>> call, @NotNull Response<List<Recipe>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().size() > 0) {
+                    List<Recipe> result = response.body();
+                    recipeList.postValue(result);
+                } else {
+                    errorLiveData.postValue("No Data!");
+                }
+                if (idlingResource != null) idlingResource.decrement();
+            }
 
-        if (recipeJson == null || recipeJson.isEmpty()) return null;
-
-        Gson gson = new Gson();
-        // TypeToken assists us to find the correct Type for List
-        Type recipeListType = new TypeToken<List<Recipe>>() {
-        }.getType();
-        return gson.fromJson(recipeJson, recipeListType);
+            @Override
+            public void onFailure(@NotNull Call<List<Recipe>> call, @NotNull Throwable t) {
+                t.printStackTrace();
+                errorLiveData.postValue(t.getMessage());
+            }
+        });
+        return recipeList;
     }
 
-    private String getRecipesFromJson() {
-        InputStream stream = Objects.requireNonNull(
-                getClass().getClassLoader()).getResourceAsStream(PATH_TO_JSON_FILE);
-        try {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-            StringBuilder stringBuilder = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                stringBuilder.append(line);
-            }
-            return stringBuilder.toString();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+    public LiveData<String> getErrors() {
+        return errorLiveData;
     }
 
     // provide recipe to widget
     public Recipe getRecipeToShare() {
-        if (widgetRecipe == null) {
-            int randomId = new Random().nextInt(recipeList.size() - 1);
-            widgetRecipe = recipeList.get(randomId);
-        }
         return widgetRecipe;
     }
 

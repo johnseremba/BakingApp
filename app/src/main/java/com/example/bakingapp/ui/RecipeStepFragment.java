@@ -24,6 +24,7 @@ import com.example.bakingapp.ui.adapters.IngredientsAdapter;
 import com.example.bakingapp.ui.adapters.RecipeStepsAdapter;
 import com.example.bakingapp.ui.viewmodel.RecipeSharedViewModel;
 import com.example.bakingapp.ui.viewmodel.SharedViewModelFactory;
+import com.example.bakingapp.util.InjectorUtils;
 import com.squareup.picasso.Picasso;
 
 import butterknife.BindView;
@@ -63,7 +64,7 @@ public class RecipeStepFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_recipe_step, container, false);
         ButterKnife.bind(this, view);
         viewModel = new ViewModelProvider(requireActivity(),
-                new SharedViewModelFactory(Repository.getInstance())).get(RecipeSharedViewModel.class);
+                InjectorUtils.provideSharedViewModelFactory()).get(RecipeSharedViewModel.class);
         return view;
     }
 

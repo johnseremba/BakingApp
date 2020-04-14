@@ -7,25 +7,31 @@ import androidx.lifecycle.ViewModel;
 import com.example.bakingapp.data.Repository;
 import com.example.bakingapp.data.model.Recipe;
 import com.example.bakingapp.data.model.Step;
+import com.example.bakingapp.util.InjectorUtils;
 
 import java.util.List;
 
 public class RecipeSharedViewModel extends ViewModel {
     private Repository repository;
-    private List<Recipe> recipes;
     private String selectedRecipeName;
+
+    private LiveData<List<Recipe>> recipes;
+    private LiveData<String> errorMsg;
     private MutableLiveData<Recipe> selectedRecipe = new MutableLiveData<>();
     private MutableLiveData<Step> selectedStep = new MutableLiveData<>();
 
     public RecipeSharedViewModel(Repository repository) {
         this.repository = repository;
+        recipes = repository.getRecipes(InjectorUtils.provideIdlingResource());
+        errorMsg = repository.getErrors();
     }
 
-    public List<Recipe> getRecipes() {
-        if (recipes == null) {
-            recipes = repository.getRecipes();
-        }
+    public LiveData<List<Recipe>> getRecipes() {
         return recipes;
+    }
+
+    public LiveData<String> getErrors() {
+        return errorMsg;
     }
 
     public LiveData<Recipe> getSelectedRecipe() {

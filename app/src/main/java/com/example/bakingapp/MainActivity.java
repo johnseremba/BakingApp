@@ -1,5 +1,6 @@
 package com.example.bakingapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -11,20 +12,21 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.bakingapp.data.Repository;
 import com.example.bakingapp.data.model.Recipe;
 import com.example.bakingapp.ui.RecipeStepFragment;
 import com.example.bakingapp.ui.RecipesFragment;
 import com.example.bakingapp.ui.ViewRecipeStepFragment;
 import com.example.bakingapp.ui.viewmodel.RecipeSharedViewModel;
-import com.example.bakingapp.ui.viewmodel.SharedViewModelFactory;
+import com.example.bakingapp.util.InjectorUtils;
 import com.example.bakingapp.widget.BakingAppWidgetProvider;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String KEY_DETAIL_VISIBLE = "KEY_DETAIL_VISIBLE";
     private FragmentManager fragmentManager;
     private boolean mTwoPane = false;
     private FrameLayout viewRecipeStepContainer;
     private View viewDivider;
+    private boolean mDetailVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,12 +39,13 @@ public class MainActivity extends AppCompatActivity {
         viewDivider = (View) findViewById(R.id.view_divider);
         mTwoPane = (viewRecipeStepContainer != null);
 
-        if (getIntent() != null) {
+        Intent intent = getIntent();
+        if (intent != null && intent.getExtras() != null) {
             // If the app is launched from the widget, load the provided recipe and display it
-            Recipe recipe = getIntent().getParcelableExtra(BakingAppWidgetProvider.EXTRA_WIDGET_RECIPE);
+            Recipe recipe = intent.getParcelableExtra(BakingAppWidgetProvider.EXTRA_WIDGET_RECIPE);
             if (recipe != null) {
                 RecipeSharedViewModel viewModel = new ViewModelProvider(this,
-                        new SharedViewModelFactory(Repository.getInstance())).get(RecipeSharedViewModel.class);
+                        InjectorUtils.provideSharedViewModelFactory()).get(RecipeSharedViewModel.class);
                 viewModel.setSelectedRecipe(recipe);
                 RecipeStepFragment recipeStepFragment = RecipeStepFragment.getInstance();
                 addFragment(recipeStepFragment, RecipeStepFragment.TAG);
@@ -54,27 +57,43 @@ public class MainActivity extends AppCompatActivity {
         if (savedInstanceState == null) {
             RecipesFragment recipesFragment = RecipesFragment.newInstance();
             addFragment(recipesFragment, RecipesFragment.TAG);
+        } else {
+            mDetailVisible = savedInstanceState.getBoolean(KEY_DETAIL_VISIBLE, false);
+            toggleTwoPaneLayout(mDetailVisible);
         }
+    }
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putBoolean(KEY_DETAIL_VISIBLE, mDetailVisible);
+        super.onSaveInstanceState(outState);
     }
 
     private void addFragment(Fragment fragment, String tag) {
         if (mTwoPane && fragment instanceof ViewRecipeStepFragment) {
             toggleTwoPaneLayout(true);
-            fragmentManager.beginTransaction()
-                    .replace(R.id.fragment_detail_container, fragment, tag)
-                    .addToBackStack(tag)
-                    .commit();
+            launchFragment(fragment, tag, false, R.id.fragment_detail_container);
             return;
         }
         toggleTwoPaneLayout(false);
+        launchFragment(fragment, tag, true, R.id.fragment_container);
+    }
 
-        fragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, fragment, tag)
-                .addToBackStack(tag)
-                .commit();
+    private void launchFragment(Fragment fragment, String tag, boolean addToBackStack, int container) {
+        if (addToBackStack) {
+            fragmentManager.beginTransaction()
+                    .replace(container, fragment, tag)
+                    .addToBackStack(tag)
+                    .commit();
+        } else {
+            fragmentManager.beginTransaction()
+                    .replace(container, fragment, tag)
+                    .commit();
+        }
     }
 
     private void toggleTwoPaneLayout(boolean showSecondPane) {
+        mDetailVisible = showSecondPane;
         if (mTwoPane) {
             viewRecipeStepContainer.setVisibility(showSecondPane ? View.VISIBLE : View.GONE);
             viewDivider.setVisibility(showSecondPane ? View.VISIBLE : View.GONE);
@@ -98,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
         if (backStackEntryCount == 1) {
             finish();
         } else {
-            if (mTwoPane) toggleTwoPaneLayout(false);
+            if (mDetailVisible) toggleTwoPaneLayout(false);
             fragmentManager.popBackStackImmediate();
         }
     }

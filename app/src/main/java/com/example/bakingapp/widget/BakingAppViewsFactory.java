@@ -12,20 +12,20 @@ import com.example.bakingapp.R;
 import com.example.bakingapp.data.Repository;
 import com.example.bakingapp.data.model.Ingredient;
 import com.example.bakingapp.data.model.Recipe;
+import com.example.bakingapp.util.InjectorUtils;
 
 import java.util.List;
 
 public class BakingAppViewsFactory implements RemoteViewsService.RemoteViewsFactory {
     private Context mContext;
     private int appWidgetId;
-    private Repository repository;
+    private Repository repository = InjectorUtils.provideRepository();
     private List<Ingredient> ingredientList;
 
     public BakingAppViewsFactory(Context mContext, Intent intent) {
         this.mContext = mContext;
         appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID,
                 AppWidgetManager.INVALID_APPWIDGET_ID);
-        repository = Repository.getInstance();
     }
 
     @Override
@@ -50,7 +50,9 @@ public class BakingAppViewsFactory implements RemoteViewsService.RemoteViewsFact
     public void onDataSetChanged() {
         final long identityToken = Binder.clearCallingIdentity();
         Recipe recipes = repository.getRecipeToShare();
-        ingredientList = recipes.getIngredients();
+        if (recipes != null) {
+            ingredientList = recipes.getIngredients();
+        }
         Binder.restoreCallingIdentity(identityToken);
     }
 

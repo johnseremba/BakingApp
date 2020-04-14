@@ -19,8 +19,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="vertical"
-        android:paddingTop="40dp"
-        android:paddingBottom="40dp">
+        android:padding="40dp">
 
         <TextView
             android:id="@+id/text_recipe_title"

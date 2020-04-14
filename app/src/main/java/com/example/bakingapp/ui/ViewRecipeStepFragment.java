@@ -48,7 +48,7 @@ public class ViewRecipeStepFragment extends Fragment {
 
     private RecipeSharedViewModel viewModel;
     private SimpleExoPlayer exoPlayer;
-    private boolean playWhenReady = false;
+    private boolean playWhenReady = true;
     private long playBackPosition;
     private int currentWindow;
     private String videoUrl = "";
@@ -83,8 +83,18 @@ public class ViewRecipeStepFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_view_recipe_step, container, false);
         ButterKnife.bind(this, view);
+
         viewModel = new ViewModelProvider(requireActivity(),
                 InjectorUtils.provideSharedViewModelFactory()).get(RecipeSharedViewModel.class);
+
+        // update toolbar
+        ActionBar actionBar = ((MainActivity) requireActivity()).getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.setTitle(viewModel.getSelectedRecipeName());
+            actionBar.setDisplayHomeAsUpEnabled(true);
+            actionBar.setDisplayShowHomeEnabled(true);
+        }
+
         if (savedInstanceState != null) {
             playWhenReady = savedInstanceState.getBoolean(KEY_PLAY_WHEN_READY, false);
             playBackPosition = savedInstanceState.getLong(KEY_PLAY_BACK_POSITION, 0);
@@ -97,16 +107,10 @@ public class ViewRecipeStepFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        // update toolbar
-        ActionBar actionBar = ((MainActivity) requireActivity()).getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setTitle(viewModel.getSelectedRecipeName());
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            actionBar.setDisplayShowHomeEnabled(true);
+        if (savedInstanceState == null) {
+            loadRecipeData();
         }
-
         initListeners();
-        loadRecipeData();
     }
 
     @Override
@@ -245,7 +249,6 @@ public class ViewRecipeStepFragment extends Fragment {
         Uri uri = Uri.parse(videoUrl);
         MediaSource videoSource = buildMediaSource(uri);
         exoPlayer.prepare(videoSource);
-        exoPlayer.setPlayWhenReady(true);
     }
 
     private MediaSource buildMediaSource(Uri uri) {

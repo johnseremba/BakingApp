@@ -49,8 +49,10 @@ public class BakingAppViewsFactory implements RemoteViewsService.RemoteViewsFact
     @Override
     public void onDataSetChanged() {
         final long identityToken = Binder.clearCallingIdentity();
-        Recipe recipes = repository.getRecipeToShare();
-        ingredientList = recipes.getIngredients();
+        Recipe recipe = repository.getRecipeToShare();
+        if (recipe != null) {
+            ingredientList = recipe.getIngredients();
+        }
         Binder.restoreCallingIdentity(identityToken);
     }
 

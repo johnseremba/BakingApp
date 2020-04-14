@@ -16,7 +16,6 @@
             android:layout_height="wrap_content"
             android:background="@color/colorPrimaryDark"
             android:padding="8dp"
-            android:text="@string/title_baking_time"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textColor="@android:color/white"
             android:textStyle="bold" />

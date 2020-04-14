@@ -9,5 +9,5 @@
     <string name="label_ingredients">Ingredients</string>
     <string name="msg_ingredient">%1$ss of %2$s</string>
     <string name="label_recipe_steps">Recipe Steps</string>
-    <string name="widget_text_no_content">No Content</string>
+    <string name="widget_text_no_content">No Recipe Selected</string>
 </resources>

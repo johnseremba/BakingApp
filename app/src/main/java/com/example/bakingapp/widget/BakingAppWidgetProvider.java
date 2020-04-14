@@ -25,6 +25,8 @@ public class BakingAppWidgetProvider extends AppWidgetProvider {
             AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
             // Widget update broadcast
             ComponentName componentName = new ComponentName(context, BakingAppWidgetProvider.class);
+            appWidgetManager.notifyAppWidgetViewDataChanged(
+                    appWidgetManager.getAppWidgetIds(componentName), R.id.list_widget_ingredients);
             onUpdate(context, appWidgetManager, appWidgetManager.getAppWidgetIds(componentName));
         }
         super.onReceive(context, intent);
@@ -46,8 +48,10 @@ public class BakingAppWidgetProvider extends AppWidgetProvider {
 
             // Set widget title to be the title of the selected recipe
             Recipe widgetRecipe = mRepository.getRecipeToShare();
-            remoteViews.setTextViewText(R.id.text_widget_recipe_title,
-                    context.getString(R.string.title_recipe, widgetRecipe.getName()));
+            if (widgetRecipe != null) {
+                remoteViews.setTextViewText(R.id.text_widget_recipe_title,
+                        context.getString(R.string.title_recipe, widgetRecipe.getName()));
+            }
 
             // Create an Intent to launch the MainActivity
             Intent activityIntent = new Intent(context, MainActivity.class);
